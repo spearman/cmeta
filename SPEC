@@ -1,0 +1,39 @@
+# Initial implementation
+
+non-pattern matching macros of the form (Rust "decl_macro" syntax):
+
+    macro MYMAC ($v : id, $e : expr, $s : stmt, $d : decl, $t : type) {
+      ...
+    }
+
+the above are the "fragment specifiers" to be allowed, which are most of the
+AST structs, except for *designators* and *type contexts*; Rust macros also
+allow the subclass of *block expressions*, in C blocks are statements so this
+might be added as another fragment specifier (`block`)
+
+for this to work:
+
+- the Racket `c-utils` parser, `(require c/parse)`, does not handle
+  pre-processor, so the code to parse will have to be extracted without
+  pre-processor commands which will be restored afterwards
+- the macro definitions themselves will not be able to be parsed by the
+  `c-utils` parser, so will have to be extracted and "compiled" to macro
+  definitions
+- once the pre-processor has been removed and macro definitions created, the
+  remaining source code can be parsed
+- for the parsed code, find invocations of defined macros, and expand
+
+extensions:
+
+- a `block` fragment specifier for block statements
+- a "token tree" fragment specifier (i.e. either the LHS or RHS of a macro)
+- repetitions, e.g. `$(v : id),*` -- zero or more comma separated identifiers
+- pattern matching:
+
+        macro MYMAC {
+          (...) => {...}
+          (...) => {...}
+          .
+          .
+          .
+        }
